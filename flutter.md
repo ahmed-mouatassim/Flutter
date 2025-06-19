@@ -1,4 +1,4 @@
-# 1. Shared Preferences:
+#  ✅ 1. **Shared Preferences:**
 
 
 ## 🪄 الكود 1 :
@@ -206,62 +206,8 @@ Future<void> removeToken() async {
 
 غادي نشرح ليك بجوج:
 
----
 
-## ✅ 1. **Shared Preferences**
-
-### 🟢 شنو هي؟
-
-`SharedPreferences` هي وسيلة باش تخزن معلومات بسيطة (مثل token ديال الauth، اسم المستخدم، boolean واش دار login ...) مباشرة فـ الهاتف (local storage).
-
-### 🟠 واش مناسبة لأي حاجة؟
-
-لا. مناسبة فقط للحاجات **البسيطة**، بحال:
-
-* Token
-* UserId
-* Theme (dark / light)
-* لغة التطبيق
-* واش دار login ولا لا...
-
-### 🛠️ كيفاش نخدم بيها؟
-
-#### أول حاجة: التثبيت
-
-ضف هاد الباكيج فـ `pubspec.yaml`:
-
-```yaml
-dependencies:
-  shared_preferences: ^2.2.2
-```
-
-#### ثاني حاجة: كيفاش نستعملها
-
-```dart
-import 'package:shared_preferences/shared_preferences.dart';
-
-// لتخزين قيمة
-Future<void> saveToken(String token) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('token', token);
-}
-
-// لقراءة القيمة
-Future<String?> getToken() async {
-  final prefs = await SharedPreferences.getInstance();
-  return prefs.getString('token');
-}
-
-// لحذف القيمة
-Future<void> removeToken() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove('token');
-}
-```
-
----
-
-## ✅ 2. **Provider**
+# ✅ 2. **Provider:**
 
 ### 🟢 شنو هو؟
 
@@ -278,3 +224,95 @@ Future<void> removeToken() async {
 
 حيت Flutter عندو UI reactive، خاصك واحد الmethod باش تنظم المعلومة وتخلي الواجهات تعرف وقتاش تحدث رأسها.
 
+## 🛠️ كيفاش نستعمله؟
+
+### 1. كندير class كيخزن البيانات ديالي:
+
+```dart
+import 'package:flutter/material.dart';
+
+class AuthProvider with ChangeNotifier {
+  String? _token;
+
+  String? get token => _token;
+
+  bool get isLoggedIn => _token != null;
+
+  void login(String token) {
+    _token = token;
+    notifyListeners(); // كيقول للواجهة تغير حالتها
+  }
+
+  void logout() {
+    _token = null;
+    notifyListeners();
+  }
+}
+```
+
+#### 2. كنربط التطبيق مع Provider:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'auth_provider.dart';
+
+void main() {
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ],
+      child: MyApp(),
+    ),
+  );
+}
+```
+
+#### 3. فـ الواجهة كنستعمله:
+
+```dart
+Consumer<AuthProvider>(
+  builder: (context, auth, _) {
+    return Text(auth.isLoggedIn ? 'Welcome!' : 'Please Login');
+  },
+);
+```
+
+أو:
+
+```dart
+final auth = Provider.of<AuthProvider>(context, listen: true);
+Text(auth.token ?? 'No Token');
+```
+
+# 🎯 3. كيفاش نستعمل SharedPreferences مع Provider؟
+
+مثلا، منين يدير المستخدم login:
+
+1. كتخزن token فـ SharedPreferences.
+2. كتخزن token فـ AuthProvider باش الواجهة تعرف.
+3. كتستعمل `Provider` باش تراقب الحالة.
+
+### مثال عملي بعد login:
+
+```dart
+void onLoginSuccess(String token) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('token', token);
+
+  final auth = Provider.of<AuthProvider>(context, listen: false);
+  auth.login(token);
+}
+```
+
+---
+
+## 📦 Summary سريع:
+
+| Tool              | الوظيفة                            | الأمثلة                    |
+| ----------------- | ---------------------------------- | -------------------------- |
+| SharedPreferences | تخزين محلي (local) بسيط            | token, theme               |
+| Provider          | تنظيم حالة التطبيق وواجهة المستخدم | login state, loading, cart |
+
+---
