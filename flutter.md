@@ -315,4 +315,159 @@ void onLoginSuccess(String token) async {
 | SharedPreferences | تخزين محلي (local) بسيط            | token, theme               |
 | Provider          | تنظيم حالة التطبيق وواجهة المستخدم | login state, loading, cart |
 
+
+
+#  ✅ 3. **CustomPaint:**
+
+
+
+## ✅ شنو هي `CustomPaint` ؟
+
+`CustomPaint` هي Widget كتسمح لينا **نرسمو أشكال (Graphics)** مباشرة على الشاشة، بحال:
+
+* دوائر ✅
+* خطوط ✅
+* مربعات ✅
+* نجوم ✅
+* أشكال مخصصة (بيدك) ✅
+
+وهادشي كامل كنديروه باستخدام كلاس اسمو `CustomPainter`.
+
 ---
+
+## ✅ فين كنستعملوها؟
+
+كنستعملوها ملي بغينا نرسمو شي حاجة خاصة بيدينا مثلاً:
+
+* رسومات على خلفية الصفحة.
+* دوائر أو خطوط مخصصة.
+* تصميمات معقّدة ما كتجيش بـ Container أو ClipPath.
+
+---
+
+## 🛠️ التركيبة العامة ديال `CustomPaint`
+
+```dart
+CustomPaint(
+  painter: MyPainter(), // هنا كندوزو الكلاص لي كيرسم
+  child: Container(
+    height: 200,
+    width: 200,
+  ),
+)
+```
+
+---
+
+## ✅ كنديرو `painter` بإستعمال `CustomPainter`
+
+```dart
+class MyPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // هنا كنرسمو
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
+  }
+}
+```
+
+---
+
+## ✅ مثال بسيط: دائرة فالنص
+
+```dart
+class MyPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.fill;
+
+    // كنرسمو دائرة فوسط الحاوية
+    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 50, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+```
+
+---
+
+## ✅ مثال تطبيقي كامل:
+
+```dart
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MaterialApp(
+    home: Scaffold(
+      body: Center(
+        child: CustomPaint(
+          painter: MyPainter(),
+          child: Container(
+            height: 200,
+            width: 200,
+          ),
+        ),
+      ),
+    ),
+  ));
+}
+
+class MyPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.fill;
+
+    // دائرة فوسط الحاوية
+    canvas.drawCircle(Offset(size.width / 2, size.height / 2), 50, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+```
+
+---
+
+## 🧠 واش فهمتي شنو كيوقع هنا؟
+
+* `Canvas` → هو السطح لي كنرسمو فيه.
+* `Paint` → هو الستيلو ديالنا: فيه اللون، والستايل.
+* `drawCircle(...)` → كترسم دائرة فالنص.
+* `Offset(x, y)` → كيعني الإحداثيات فين غادي ترسم.
+
+---
+
+## 🎨 حاجات خرا تقدر ترسمها:
+
+| الدالة                              | شنو كتدير        |
+| ----------------------------------- | ---------------- |
+| `drawLine(start, end, paint)`       | كترسم خط         |
+| `drawRect(rect, paint)`             | كترسم مربع       |
+| `drawCircle(center, radius, paint)` | كترسم دائرة      |
+| `drawOval(rect, paint)`             | كترسم شكل بيضاوي |
+| `drawPath(path, paint)`             | كترسم شكل مخصص   |
+
+---
+
+## 🔁 الفرق بين `ClipPath` و `CustomPaint`؟
+
+| ClipPath                          | CustomPaint             |
+| --------------------------------- | ----------------------- |
+| كتقص الشكل من widget              | كترسم على canvas        |
+| خدامة بالـ Path فقط               | خدامة بجميع أدوات الرسم |
+| ما كتقدرش ترسم بزاف ديال التفاصيل | تقدر ترسم أي حاجة       |
+
+---
+
+إيلا بغيتي نوريك كيفاش ترسم شكل معيّن (قلب، نجمة، موجة...) بـ `CustomPaint` غير قولها ليا، ونعطيك الكود ديالها 😍
+
+📌 واش نخدمو مثال عملي بـ `CustomPaint` فيه موجة أو شمس ولا شي حاجة إبداعية؟
